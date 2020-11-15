@@ -13,8 +13,8 @@ pub struct Product {
     id: String,
     name: String,
     price: f64,
-    discount_threshold: Option<i32>,
-    discount_price: Option<f32>,
+    discount_threshold: Option<u64>,
+    discount_price: Option<f64>,
 }
 #[derive(Debug, Serialize, Deserialize)]
 struct OrderItem {
@@ -37,7 +37,21 @@ impl OrderItem {
             }
         }
         // calculate revised order total
-        let total:f64  = order.items.iter().map(|i| i.item.price * i.count as f64).sum();
+        let total: f64 = order
+            .items
+            .iter()
+            .map(|i| {
+                if let (Some(discount_threshold), Some(discount_price)) = (i.item.discount_threshold, i.item.discount_price) {
+                        if discount_threshold < i.count {
+                            i.item.price * i.count as f64
+                        } else {
+                            discount_price * i.count as f64
+                        }
+                } else {
+                    i.item.price * i.count as f64
+                }
+            })
+            .sum();
         order.total = total;
     }
 }
@@ -131,5 +145,42 @@ mod tests {
         println!("Order is {:#?}", order);
 
         assert_eq!(order.total, 8.99);
+    }
+
+    #[test]
+    fn total_is_correct_with_discounts() {
+        let p1 = Product {
+            id: "001".to_string(),
+            name: "widget".to_string(),
+            price: 2.50,
+            discount_price: Some(1.50),
+            discount_threshold: Some(2),
+        };
+        let p2 = Product {
+            id: "002".to_string(),
+            name: "flipper".to_string(),
+            price: 3.99,
+            discount_price: None,
+            discount_threshold: None,
+        };
+        let p3 = Product {
+            id: "001".to_string(),
+            name: "widget".to_string(),
+            price: 2.50,
+            discount_price: Some(1.50),
+            discount_threshold: Some(2),
+        };
+
+        let mut order = Order::new();
+        order = Order::add_to_order(order, &p1);
+        order = Order::add_to_order(order, &p2);
+
+        assert_eq!(order.total, 5.49); // no discount yet
+
+        order = Order::add_to_order(order, &p3);
+
+        println!("Order is {:#?}", order);
+
+        assert_eq!(order.total, 6.99); // discount threshold reached for 001
     }
 }
