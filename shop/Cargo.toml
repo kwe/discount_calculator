@@ -1,5 +1,5 @@
 [package]
-name = "checkout"
+name = "shop"
 version = "0.1.0"
 authors = ["kwe <kwevans@gmail.com>"]
 edition = "2018"

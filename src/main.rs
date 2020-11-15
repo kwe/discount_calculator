@@ -1,5 +1,4 @@
-use checkout;
-
+use shop;
 
 fn main() {
 
@@ -26,7 +25,7 @@ let promotional_rules = r#"
             "name":"Kids T-shirt ",
             "price":19.95
         }
-        ]
+    ]
 }
 "#;
 
@@ -35,10 +34,9 @@ let promotional_rules = r#"
     let mut basket = vec!["001", "002", "003"];
     println!("Basket: {:?}", basket);
 
-    checkout::new(promotional_rules);
+    let co = shop::Checkout::new(promotional_rules);
     // checkout::scan("001");
     // checkout::scan("003");
-    let price = checkout::total();
 
     basket = vec!["001","003","001"];
     println!("Basket: {:#?}", basket);
