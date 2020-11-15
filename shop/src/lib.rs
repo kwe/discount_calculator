@@ -38,7 +38,7 @@ impl OrderItem {
         }
         // calculate revised order total
         let total:f64  = order.items.iter().map(|i| i.item.price * i.count as f64).sum();
-        println!("Runing total is {:#?}",total);
+        order.total = total;
     }
 }
 
@@ -130,6 +130,6 @@ mod tests {
 
         println!("Order is {:#?}", order);
 
-        assert_eq!(order.total, 6.49);
+        assert_eq!(order.total, 8.99);
     }
 }
