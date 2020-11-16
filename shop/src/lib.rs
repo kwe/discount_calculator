@@ -87,17 +87,38 @@ impl Order {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Checkout {
     order: Order,
+    rules: PromotionalRules
 }
 
 impl Checkout {
-    pub fn new(promotional_rules: &str) {
-        println!("new called");
+    pub fn new(promotional_rules: &str) -> Checkout {
         let rules: PromotionalRules = serde_json::from_str(promotional_rules).unwrap();
-        println!("Rules are {:#?}", rules)
+        let mut order = Order::new();
+
+        Self {
+            order,
+            rules
+        }
+
     }
 
-    pub fn scan(_item_code: &str) {
-        println!("scan called");
+    pub fn scan(co:&mut Checkout, item_code: &str) {
+        println!("scan called for {:#?}", item_code);
+        // find product details in loaded rules
+
+        let known_product = co.rules.products
+                .iter()
+                .find(|p| p.id == item_code);
+        match known_product {
+            Some(product) => {
+                let order = &co.order;
+                co.order = Order::add_to_order(order, product);
+            },
+            None => {
+                unimplemented!() // assumption that only valid products for this excercise 
+            }
+        };
+        // add product to order
     }
 
     pub fn total(&self) -> f64 {
@@ -136,15 +157,48 @@ mod tests {
             ]
         }
         "#;
-        Checkout::new(rules);
+        let co = Checkout::new(rules);
+
+        // let's test checkout is valid
+        assert_eq!(co.rules.version, 1);
+        assert_eq!(co.rules.products.len(),3);
+        assert_eq!(co.rules.products[0].name,"Lavender heart");
+        assert_eq!(co.order.total,0.0);
     }
     #[test]
-    fn read_promotional_rules() {
-        assert_eq!(2 + 2, 4);
-    }
-    #[test]
-    fn scan_items() {
-        assert_eq!(2 + 2, 4);
+    fn scan_adds_item_to_order() {
+        let rules = r#"
+        {
+            "version" : 1,
+            "total_discount_threshold": 60.00,
+            "total_discount_percentage": 10,
+            "products": [
+                {
+                    "id":"001",
+                    "name":"Lavender heart",
+                    "price":9.25,
+                    "discount_threshold":2,
+                    "discount_price": 8.50
+                },
+                        {
+                    "id":"002",
+                    "name":"Personalised cufflinks",
+                    "price":45.00
+                },
+                        {
+                    "id":"003",
+                    "name":"Kids T-shirt ",
+                    "price":19.95
+                }
+            ]
+        }
+        "#;
+        let mut co = Checkout::new(rules);
+       
+        Checkout::scan(&mut co,"001");
+        assert_eq!(co.order.items.len(),1);
+
+        assert_eq!(co.order.total, 9.25);
     }
     #[test]
     fn total_is_correct_without_discounts() {
