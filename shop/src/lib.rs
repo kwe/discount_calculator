@@ -1,6 +1,4 @@
-
 use serde::{Deserialize, Serialize};
-use serde_json::Result;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PromotionalRules {
@@ -34,13 +32,13 @@ impl OrderItem {
                     item: product,
                     count: 1,
                 };
-                &order.items.push(item);
+                order.items.push(item);
             }
         }
         // calculate revised order total
         let total: f64 = order
             .items
-            .iter()
+            .iter_mut()
             .map(|i| {
                 if let (Some(discount_threshold), Some(discount_price)) = (i.item.discount_threshold, i.item.discount_price) {
                         if discount_threshold < i.count {
@@ -69,7 +67,7 @@ impl Order {
             total: 0.0,
         }
     }
-    fn add_to_order(mut self, product: &Product) -> Order {
+    fn add_to_order(order: &mut Order, product: &Product) {
         // add product as an order item, increment count if product already in order
         let p = Product {
             id: product.id.to_string(),
@@ -78,9 +76,7 @@ impl Order {
             discount_threshold: product.discount_threshold,
             discount_price: product.discount_price,
         };
-        let item = OrderItem::new(&mut self, p);
-
-        self
+        OrderItem::new(order, p);
     }
 }
 
@@ -93,7 +89,7 @@ pub struct Checkout {
 impl Checkout {
     pub fn new(promotional_rules: &str) -> Checkout {
         let rules: PromotionalRules = serde_json::from_str(promotional_rules).unwrap();
-        let mut order = Order::new();
+        let order = Order::new();
 
         Self {
             order,
@@ -111,8 +107,7 @@ impl Checkout {
                 .find(|p| p.id == item_code);
         match known_product {
             Some(product) => {
-                let order = &co.order;
-                co.order = Order::add_to_order(order, product);
+                Order::add_to_order(&mut co.order, product);
             },
             None => {
                 unimplemented!() // assumption that only valid products for this excercise 
@@ -193,10 +188,12 @@ mod tests {
             ]
         }
         "#;
-        let mut co = Checkout::new(rules);
+        let mut co: Checkout = Checkout::new(rules);
        
         Checkout::scan(&mut co,"001");
         assert_eq!(co.order.items.len(),1);
+
+        println!("co is {:#?}", co);
 
         assert_eq!(co.order.total, 9.25);
     }
@@ -225,9 +222,9 @@ mod tests {
         };
 
         let mut order = Order::new();
-        order = Order::add_to_order(order, &p1);
-        order = Order::add_to_order(order, &p2);
-        order = Order::add_to_order(order, &p3);
+        Order::add_to_order(&mut order, &p1);
+        Order::add_to_order(&mut order, &p2);
+        Order::add_to_order(&mut order, &p3);
 
         println!("Order is {:#?}", order);
 
@@ -259,12 +256,12 @@ mod tests {
         };
 
         let mut order = Order::new();
-        order = Order::add_to_order(order, &p1);
-        order = Order::add_to_order(order, &p2);
+        Order::add_to_order(&mut order, &p1);
+        Order::add_to_order(&mut order, &p2);
 
         assert_eq!(order.total, 5.49); // no discount yet
 
-        order = Order::add_to_order(order, &p3);
+        Order::add_to_order(&mut order, &p3);
 
         println!("Order is {:#?}", order);
 
