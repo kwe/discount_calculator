@@ -1,11 +1,12 @@
+
 use serde::{Deserialize, Serialize};
-// use serde_json::Result;
+use serde_json::Result;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PromotionalRules {
-    version: u32,
-    total_discount_threshold: f32,
-    total_discount_percentage: u8,
+    version: i64,
+    total_discount_threshold: f64,
+    total_discount_percentage: i64,
     products: Vec<Product>,
 }
 #[derive(Debug, Serialize, Deserialize)]
@@ -89,8 +90,10 @@ pub struct Checkout {
 }
 
 impl Checkout {
-    pub fn new(_promotional_rules: &str) {
+    pub fn new(promotional_rules: &str) {
         println!("new called");
+        let rules: PromotionalRules = serde_json::from_str(promotional_rules).unwrap();
+        println!("Rules are {:#?}", rules)
     }
 
     pub fn scan(_item_code: &str) {
@@ -105,6 +108,36 @@ impl Checkout {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn read_in_rules() {
+        let rules = r#"
+        {
+            "version" : 1,
+            "total_discount_threshold": 60.00,
+            "total_discount_percentage": 10,
+            "products": [
+                {
+                    "id":"001",
+                    "name":"Lavender heart",
+                    "price":9.25,
+                    "discount_threshold":2,
+                    "discount_price": 8.50
+                },
+                        {
+                    "id":"002",
+                    "name":"Personalised cufflinks",
+                    "price":45.00
+                },
+                        {
+                    "id":"003",
+                    "name":"Kids T-shirt ",
+                    "price":19.95
+                }
+            ]
+        }
+        "#;
+        Checkout::new(rules);
+    }
     #[test]
     fn read_promotional_rules() {
         assert_eq!(2 + 2, 4);

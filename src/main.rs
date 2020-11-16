@@ -4,7 +4,7 @@ fn main() {
 
 let promotional_rules = r#"
 {
-    "version" : "v1",
+    "version" : 1,
     "total_discount_threshold": 60.00,
     "total_discount_percentage": 10,
     "products": [
