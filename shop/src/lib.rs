@@ -49,7 +49,9 @@ impl OrderItem {
 
     fn calculate_cost(product : &OrderItem) -> f64 {
         if product.item.discount_threshold != 0.0_f64 {
-            return product.count as f64 * product.item.discount_price
+            if product.count as f64  >= product.item.discount_threshold {
+                return product.count as f64 * product.item.discount_price
+            }
         } 
         product.count as f64 * product.item.price
     }
@@ -177,8 +179,8 @@ mod tests {
                     "id":"001",
                     "name":"Lavender heart",
                     "price":19.25,
-                    "discount_threshold":0,
-                    "discount_price": 0
+                    "discount_threshold":2,
+                    "discount_price": 9.25
                 },
                         {
                     "id":"002",
@@ -209,14 +211,13 @@ mod tests {
         co.scan("001");
         assert_eq!(co.order.items.len(), 3);
 
-        println!("{:#?}", co);
         assert_eq!(co.total(), 64.20);
 
         // test discount is applied for two 001
 
         co.scan("001");
         assert_eq!(co.order.items.len(), 3); 
-        assert_eq!(co.total(), 61.95);
+        assert_eq!(co.total(), 63.45);
 
     }
     #[test]
@@ -231,10 +232,10 @@ mod tests {
                     "id":"001",
                     "name":"Lavender heart",
                     "price":9.25,
-                    "discount_threshold": 2,
+                    "discount_threshold": 2.0,
                     "discount_price": 8.50
                 },
-                        {
+                {
                     "id":"002",
                     "name":"Personalised cufflinks",
                     "price":4.99,
@@ -253,17 +254,17 @@ mod tests {
         "#;
         let mut co: Checkout = Checkout::new(rules);
         co.scan("001");
+
         assert_eq!(co.order.items.len(), 1);
-
-
-        assert_eq!(co.order.total, 9.25); // test that 1 item is not discounted
-        assert_eq!(co.total(), 9.25);
+        assert_eq!(co.total(), 9.25); // test that 1 item is not discounted
 
         co.scan("002");
+         assert_eq!(co.order.items.len(), 2);       
+        assert_eq!(co.total(), 14.24);
+        
         co.scan("003");
-
         assert_eq!(co.order.items.len(), 3); // now have two products in the order
-        assert_eq!(co.total(), 30.141000000000002);
+        assert_eq!(co.total(), 30.14);
     }
     #[test]
     fn total_is_correct_without_discounts() {
