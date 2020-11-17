@@ -1,8 +1,7 @@
 use shop;
 
 fn main() {
-
-let promotional_rules = r#"
+    let promotional_rules = r#"
 {
     "version" : 1,
     "total_discount_threshold": 60.00,
@@ -34,15 +33,32 @@ let promotional_rules = r#"
     let mut basket = vec!["001", "002", "003"];
     println!("Basket: {:?}", basket);
 
-    let co = shop::Checkout::new(promotional_rules);
+    let mut co = shop::Checkout::new(promotional_rules);
     // checkout::scan("001");
     // checkout::scan("003");
 
-    basket = vec!["001","003","001"];
-    println!("Basket: {:#?}", basket);
-    
-    basket = vec!["001","002","001", "003"];
+    basket = vec!["001", "002", "003"];
     println!("Basket: {:#?}", basket);
 
+    for item in basket {
+        co.scan(item)
+    }
 
+    println!("{:#?}", co.total());
+
+    basket = vec!["001", "003", "001"];
+    println!("Basket: {:#?}", basket);
+
+    for item in basket.iter() {
+        co.scan(item);
+    }
+    println!("{:#?}", co.total());
+
+    basket = vec!["001", "002", "001", "003"];
+    println!("Basket: {:#?}", basket);
+
+    for item in basket.iter() {
+        co.scan(item);
+    }
+    println!("{:#?}", co.total());
 }

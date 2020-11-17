@@ -67,7 +67,7 @@ impl Order {
             total: 0.0,
         }
     }
-    fn add_to_order(order: &mut Order, product: &Product) {
+    fn add_to_order(&mut self, product: &Product) {
         // add product as an order item, increment count if product already in order
         let p = Product {
             id: product.id.to_string(),
@@ -76,7 +76,7 @@ impl Order {
             discount_threshold: product.discount_threshold,
             discount_price: product.discount_price,
         };
-        OrderItem::new(order, p);
+        OrderItem::new(self, p);
     }
 }
 
@@ -98,16 +98,16 @@ impl Checkout {
 
     }
 
-    pub fn scan(co:&mut Checkout, item_code: &str) {
+    pub fn scan(&mut self, item_code: &str) {
         println!("scan called for {:#?}", item_code);
         // find product details in loaded rules
 
-        let known_product = co.rules.products
+        let known_product = self.rules.products
                 .iter()
                 .find(|p| p.id == item_code);
         match known_product {
             Some(product) => {
-                Order::add_to_order(&mut co.order, product);
+                self.order.add_to_order(product);
             },
             None => {
                 unimplemented!() // assumption that only valid products for this excercise 
@@ -190,12 +190,14 @@ mod tests {
         "#;
         let mut co: Checkout = Checkout::new(rules);
        
-        Checkout::scan(&mut co,"001");
+        co.scan("002");
         assert_eq!(co.order.items.len(),1);
 
         println!("co is {:#?}", co);
 
-        assert_eq!(co.order.total, 9.25);
+        assert_eq!(co.order.total, 45.00);
+
+        assert_eq!(co.total(), 45.00);
     }
     #[test]
     fn total_is_correct_without_discounts() {
@@ -222,9 +224,9 @@ mod tests {
         };
 
         let mut order = Order::new();
-        Order::add_to_order(&mut order, &p1);
-        Order::add_to_order(&mut order, &p2);
-        Order::add_to_order(&mut order, &p3);
+        order.add_to_order(&p1);
+        order.add_to_order(&p2);
+        order.add_to_order(&p3);
 
         println!("Order is {:#?}", order);
 
@@ -256,12 +258,12 @@ mod tests {
         };
 
         let mut order = Order::new();
-        Order::add_to_order(&mut order, &p1);
-        Order::add_to_order(&mut order, &p2);
+        order.add_to_order(&p1);
+        order.add_to_order(&p2);
 
         assert_eq!(order.total, 5.49); // no discount yet
 
-        Order::add_to_order(&mut order, &p3);
+        order.add_to_order(&p3);
 
         println!("Order is {:#?}", order);
 
