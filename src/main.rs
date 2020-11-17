@@ -5,7 +5,7 @@ fn main() {
 {
     "version" : 1,
     "total_discount_threshold": 60.00,
-    "total_discount_percentage": 10,
+    "total_discount_percentage": 10.00,
     "products": [
         {
             "id":"001",
@@ -17,12 +17,16 @@ fn main() {
                 {
             "id":"002",
             "name":"Personalised cufflinks",
-            "price":45.00
+            "price":45.00,
+            "discount_threshold":0.0,
+            "discount_price": 0.0
         },
                 {
             "id":"003",
             "name":"Kids T-shirt ",
-            "price":19.95
+            "price":19.95,
+            "discount_threshold":0.0,
+            "discount_price": 0.0
         }
     ]
 }
@@ -46,6 +50,8 @@ fn main() {
 
     println!("{:#?}", co.total());
 
+    let mut co = shop::Checkout::new(promotional_rules);
+
     basket = vec!["001", "003", "001"];
     println!("Basket: {:#?}", basket);
 
@@ -53,6 +59,8 @@ fn main() {
         co.scan(item);
     }
     println!("{:#?}", co.total());
+
+    let mut co = shop::Checkout::new(promotional_rules);
 
     basket = vec!["001", "002", "001", "003"];
     println!("Basket: {:#?}", basket);
