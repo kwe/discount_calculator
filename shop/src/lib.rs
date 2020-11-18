@@ -291,14 +291,14 @@ mod tests {
             discount_price: 0.0,
             discount_threshold: 0.0,
         };
-
+        // unit test the Order object
         let mut order = Order::new();
         order.add_to_order(&p1);
         order.add_to_order(&p2);
         order.add_to_order(&p3);
 
         assert_eq!(order.items.len(), 3); //check there are three order items
-        assert_eq!(order.items[0].count, 1); // ensure it's recorded one of 001  scanned
+        assert_eq!(order.items[0].count, 1); // ensure it's recorded one of 001 scanned
         assert_eq!(order.items[0].item.id, "001".to_string()); // check it's recorded the item
 
         assert_eq!(order.total, 14.48);

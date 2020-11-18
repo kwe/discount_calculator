@@ -80,7 +80,7 @@ Basket: ["001", "001", "002", "003"]
 *nb: the final test randomises the scanning order as mentioned in the challenge.*
 
 ## Rust notes
-I took the words 'challenge' and 'modern language' literally and ended up with this my first Rust application. The 'checkout' functionality is developed as a testable library (in the shop folder). With a local install of Rust one can run the library tests with...
+I took the words 'challenge' and 'modern language' literally and ended up with this my first Rust application. The 'checkout' functionality is developed as a [testable library](https://github.com/kwe/discount_calculator/blob/master/shop/src/lib.rs). With a local install of Rust one can run the library tests with...
 
 ```bash
 cd shop
