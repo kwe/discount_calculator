@@ -114,10 +114,12 @@ impl Checkout {
         if self.rules.total_discount_threshold > 0.0 {
             // has the total reached or exceeded the threshold to apply a discount?
             if self.order.total >= self.rules.total_discount_threshold {
+                // take off the discount percentage
                 let amount = self.order.total - (self.order.total * (self.rules.total_discount_percentage / 100.00));
-                return (amount * 100.00).round() / 100.00;
+                return (amount * 100.00).round() / 100.00; // round to 2 decimal places.
             } else {
-                return (self.order.total * 100.00).round() / 100.00;
+                // not discount on total
+                return (self.order.total * 100.00).round() / 100.00; // round to two decimal places
             }
         } 
         self.order.total
@@ -161,7 +163,7 @@ mod tests {
         "#;
         let co = Checkout::new(rules);
 
-        // let's test checkout is valid
+        // let's test Checkout is valid
         assert_eq!(co.rules.version, 1);
         assert_eq!(co.rules.products.len(), 3);
         assert_eq!(co.rules.products[0].name, "Lavender heart");
