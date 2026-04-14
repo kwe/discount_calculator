@@ -8,4 +8,4 @@ edition = "2018"
 
 [dependencies]
 shop = {path ="shop"}
-rand = "0.7.3"
+rand = "0.9.3"
